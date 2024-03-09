@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
  * TODO-list:
  * 1) fix exception handler for validation (test errors bag)
  * 2) test $request->json in booking
+ * 3) add select seat method
  */
 
 class BookingController extends Controller

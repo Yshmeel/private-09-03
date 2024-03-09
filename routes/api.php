@@ -14,6 +14,19 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::post('/api/register', [\App\Http\Controllers\UserController::class, 'register']);
+Route::post('/api/login', [\App\Http\Controllers\UserController::class, 'authentication']);
+
+// Airports & Flights routing
+Route::get('/api/airport', [\App\Http\Controllers\FlightsController::class, 'airports']);
+Route::get('/api/flight', [\App\Http\Controllers\FlightsController::class, 'flights']);
+
+// Bookings routing
+Route::post('/api/booking', [\App\Http\Controllers\BookingController::class, 'post']);
+Route::get('/api/booking/{code}', [\App\Http\Controllers\BookingController::class, 'get']);
+Route::get('/api/booking/{code}/seat', [\App\Http\Controllers\BookingController::class, 'getOccupiedSeats']);
+
+Route::middleware('auth.api')->group(function() {
+    Route::get('/user/booking', [\App\Http\Controllers\BookingController::class, 'getOccupiedSeats']);
+    Route::get('/user', [\App\Http\Controllers\UserController::class, 'current']);
 });
