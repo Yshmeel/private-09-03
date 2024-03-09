@@ -26,7 +26,7 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
-        $this->reportable(function (Throwable $e) {
+        $this->renderable(function (Throwable $e) {
             if($e instanceof ModelNotFoundException) {
                 return response()->json([
                     'error' => [
@@ -48,16 +48,29 @@ class Handler extends ExceptionHandler
             if($e instanceof ValidationException) {
                 $messages = [];
 
-                dd($e->errors());
-                foreach($e->errors() as $error) {
+                // NOTE: $errors inside foreach loop is array of messages
+                foreach($e->errors() as $key=>$errors) {
+                    $errorMessages = [];
 
+                    // NOTE: specification requires custom messages for validation
+                    foreach($errors as $error) {
+                        $message = $error;
+
+                        if(str_contains($error, 'is required')) {
+                            $message = "field ${key} can not be blank";
+                        }
+
+                        $errorMessages[] = $message;
+                    }
+
+                    $messages[$key] = $errorMessages;
                 }
 
                 return response()->json([
                     'error' => [
                         'code' => 422,
                         'message' => 'Validation error',
-                        'errors' => []
+                        'errors' => $messages
                     ]
                 ], 422);
             }

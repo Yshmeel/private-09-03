@@ -18,14 +18,18 @@ class BookingResource extends JsonResource
         // NOTE: cost is pricing for all flights. flightFrom/flightTo is always provided
         $cost = $this->flightFrom->cost;
 
+        // NOTE: assign from/back date to model, to satisfy flight resource
+        $this->flightFrom->date = $this->date_from;
+        $this->flightBack->date = $this->date_back;
+
         $flights = [
             new FlightResource($this->flightFrom),
         ];
 
         // NOTE: flightTo might be null
-        if($this->flightTo != null) {
-            $flights[] = new FlightResource($this->flightTo);
-            $cost += $this->flightTo->cost;
+        if($this->flightBack != null) {
+            $flights[] = new FlightResource($this->flightBack);
+            $cost += $this->flightBack->cost;
         }
 
         return [

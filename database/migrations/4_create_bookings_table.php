@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('flight_from')->constrained('flights');
-            $table->foreignId('flight_to')->constrained('flights');
+            $table->foreignId('flight_back')->constrained('flights');
             $table->date('date_from');
-            $table->date('date_to');
+            $table->date('date_back');
             $table->string('code', 5);
             $table->dateTime('created_at')->useCurrent();
             $table->dateTime('updated_at')->useCurrent();

@@ -19,7 +19,7 @@ class PassengerResource extends JsonResource
             'id' => $this->id,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
-            'birth_date' => Carbon::createFromTimeString($this->birth_date)->format('Y-m-d'),
+            'birth_date' => $this->birth_date,
             'document_number' => $this->document_number,
             'place_from' => $this->place_from ?? null,
             'place_to' => $this->place_to ?? null,

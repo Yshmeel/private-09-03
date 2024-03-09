@@ -5,11 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Resources\AirportResource;
 use App\Http\Resources\FlightResource;
 use App\Models\Airport;
-use App\Models\Booking;
 use App\Models\Flight;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class FlightsController extends Controller
 {
@@ -22,11 +20,18 @@ class FlightsController extends Controller
         // query query query query query query
         $query = $request->query('query', '');
 
-        $airports = Airport::query()
-            ->where('city', 'ILIKE', $query)
-            ->orWhere('iata', 'ILIKE', $query)
-            ->orWhere('name', 'ILIKE', $query)
-            ->get();
+        $airports = Airport::query();
+
+        // NOTE: search with raw query, convert fields to lower case and compare
+        if($query != '') {
+            $safeQuery = '%' . strtolower($query) . '%';
+            $airports = $airports
+                ->whereRaw("LOWER(city) LIKE ?", [$safeQuery])
+                ->orWhereRaw("LOWER(name) LIKE ?", [$safeQuery])
+                ->orWhereRaw("LOWER(iata) LIKE ?", [$safeQuery]);
+        }
+
+        $airports = $airports->get();
 
         return response()->json([
             'data' => [
@@ -51,14 +56,21 @@ class FlightsController extends Controller
         $to = $request->input('to');
 
         $date1 = $request->input('date1');
-        $date2 = $request->input('date2', null);
+        $date2 = $request->input('date2');
 
         $passengers = $request->integer('passengers', 1);
 
         // NOTE: INNER JOIN performs as search for `from-to` pairs
         $flights = Flight::query()
-            ->join('airports `from`', 'iata', '=',  $from)
-            ->join('airports `to`', 'iata', '=', $to)
+            ->with(['from', 'to'])
+            ->join('airports AS from', 'from.id', '=', 'flights.from_id')
+            ->join('airports AS to', 'to.id', '=', 'flights.to_id')
+            ->whereRaw('(from.iata = ? AND to.iata = ?) OR (from.iata = ? AND to.iata = ?)', [
+                $from,
+                $to,
+                $to,
+                $from,
+            ])
             ->get();
 
         $flightsTo = [];
@@ -67,21 +79,28 @@ class FlightsController extends Controller
 
         foreach($flights as $flight) {
             // NOTE: all bookings were made to satisfy places count. Do not show in result list
-            if($flight->availablePlacesCount() <= $passengers) {
+            if($flight->availablePlacesCount($date1) < $passengers ||
+                $flight->availablePlacesCount($date2) < $passengers) {
                 continue;
             }
 
-            $flightsTo[] = $flight;
+            // NOTE: is flight in loop is TO destination
+            if($flight->from->iata == $from && $flight->to->iata == $to) {
+                $flight->date = $date1;
+                $flightsTo[] = $flight;
+            }
 
-            if($date2 != null) {
+            // NOTE: is  flight in loop is FROM destination
+            if($date2 != null && $flight->from->iata == $to && $flight->to->iata == $from) {
+                $flight->date = $date2;
                 $flightsBack[] = $flight;
             }
         }
 
         return response()->json([
             'data' => [
-                'flights_to' => FlightResource::collection($flightsTo)->withDate($date1),
-                'flights_back' => FlightResource::collection($flightsBack)->withDate($date2),
+                'flights_to' => FlightResource::collection($flightsTo),
+                'flights_back' => FlightResource::collection($flightsBack),
             ],
         ], 200);
     }

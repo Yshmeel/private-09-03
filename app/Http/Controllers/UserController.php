@@ -4,16 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
+    /**
+     * Create user based on input
+     */
     public function register(Request $request) {
         // NOTE: phone must be unique for every User; unique param checks this
         $request->validate([
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'phone' => 'required|unique:User|string',
+            'phone' => 'required|unique:users|string',
             'document_number' => 'required|string|min:10|max:10',
             'password' => 'required|string'
         ]);
@@ -24,7 +28,7 @@ class UserController extends Controller
             'last_name' => $request->input('last_name'),
             'phone' => $request->input('phone'),
             'document_number' => $request->input('document_number'),
-            'password' => $request->input('password'),
+            'password' => Hash::make($request->input('password')),
         ]);
 
         $user->save();
@@ -32,6 +36,9 @@ class UserController extends Controller
         return response()->noContent();
     }
 
+    /**
+     * Authenticate user and get unique token
+     */
     public function authentication(Request $request) {
         $request->validate([
             'phone' => 'required|string',
@@ -41,7 +48,7 @@ class UserController extends Controller
         $user = User::query()->where('phone', $request->input('phone'))->first();
 
         // TODO: move error to App/Exceptions later
-        if($user == null) {
+        if($user == null || !Hash::check($request->input('password'), $user->password)) {
             return response()->json([
                 'error' => [
                     'code' => 401,

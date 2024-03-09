@@ -24,8 +24,8 @@ class Booking extends Model
         return $this->belongsTo(Flight::class, 'flight_from');
     }
 
-    public function flightTo() {
-        return $this->belongsTo(Flight::class, 'flight_to');
+    public function flightBack() {
+        return $this->belongsTo(Flight::class, 'flight_back');
     }
 
     public function passengers() {

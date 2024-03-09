@@ -2,13 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Flight;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class FlightResource extends JsonResource
 {
-    public $date = '';
-
     /**
      * Transform the resource into an array.
      *
@@ -21,25 +20,21 @@ class FlightResource extends JsonResource
             'flight_code' => $this->flight_code,
             'from' => [
                 'city' => $this->from->city,
-                'airport' => $this->from->airport,
+                'airport' => $this->from->name,
                 'iata' => $this->from->iata,
                 'date' => $this->date,
-                'time' => $this->time_from,
+                'time' => substr($this->time_from, 0, strlen($this->time_from) - 3),
             ],
             'to' => [
                 'city' => $this->to->city,
-                'airport' => $this->to->airport,
+                'airport' => $this->to->name,
                 'iata' => $this->to->iata,
                 'date' => $this->date,
-                'time' => $this->time_to,
+                'time' => substr($this->time_to, 0, strlen($this->time_to) - 3),
             ],
             'cost' => $this->cost,
-            'availability' => $this->availablePlacesCount(),
+            'availability' => $this->availablePlacesCount($this->date),
         ];
     }
 
-    public function withDate(string $date): FlightResource {
-        $this->date = $date;
-        return $this;
-    }
 }
