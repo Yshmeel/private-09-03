@@ -46,7 +46,7 @@ class BookingController extends Controller
 
         if($flightFrom->availablePlacesCount($flightFromObject->date) < $passengersCount) {
             $exception = ValidationException::withMessages([
-                'flight_from.date' => 'All places for this flight is already taken'
+                'flight_from.date' => 'All places for this flight were already taken'
             ]);
 
             throw $exception;
@@ -54,7 +54,7 @@ class BookingController extends Controller
 
         if($flightBack->availablePlacesCount($flightBackObject->date) < $passengersCount) {
             $exception = ValidationException::withMessages([
-                'flight_back.date' => 'All places for this flight is already taken'
+                'flight_back.date' => 'All places for this flight were already taken'
             ]);
 
             throw $exception;

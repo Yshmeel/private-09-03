@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
             'time_from' => '10:30',
             'time_to' => '12:45',
             'cost' => 10000,
-            'places_count' => 48
+            'places_count' => 188
         ]);
 
         Flight::create([
@@ -49,7 +49,7 @@ class DatabaseSeeder extends Seeder
             'time_from' => '18:45',
             'time_to' => '19:30',
             'cost' => 10000,
-            'places_count' => 48
+            'places_count' => 188
         ]);
 
         Flight::create([
@@ -59,7 +59,7 @@ class DatabaseSeeder extends Seeder
             'time_from' => '09:10',
             'time_to' => '14:20',
             'cost' => 3000,
-            'places_count' => 64
+            'places_count' => 188
         ]);
 
         Flight::create([
@@ -69,7 +69,7 @@ class DatabaseSeeder extends Seeder
             'time_from' => '13:15',
             'time_to' => '16:40',
             'cost' => 8000,
-            'places_count' => 96
+            'places_count' => 188
         ]);
 
         Flight::create([
@@ -79,7 +79,7 @@ class DatabaseSeeder extends Seeder
             'time_from' => '19:15',
             'time_to' => '21:40',
             'cost' => 8000,
-            'places_count' => 96
+            'places_count' => 188
         ]);
     }
 }
