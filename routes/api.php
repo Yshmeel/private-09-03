@@ -25,6 +25,7 @@ Route::get('/api/flight', [\App\Http\Controllers\FlightsController::class, 'flig
 Route::post('/api/booking', [\App\Http\Controllers\BookingController::class, 'post']);
 Route::get('/api/booking/{code}', [\App\Http\Controllers\BookingController::class, 'get']);
 Route::get('/api/booking/{code}/seat', [\App\Http\Controllers\BookingController::class, 'getOccupiedSeats']);
+Route::patch('/api/booking/{code}/seat', [\App\Http\Controllers\BookingController::class, 'selectSeat']);
 
 Route::middleware('auth.api')->group(function() {
     Route::get('/user/booking', [\App\Http\Controllers\BookingController::class, 'getOccupiedSeats']);

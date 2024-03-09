@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('birth_date');
             $table->string('document_number', 10);
             $table->string('place_from', 3)->nullable();
-            $table->string('place_to', 3)->nullable();
+            $table->string('place_back', 3)->nullable();
             $table->dateTime('created_at')->useCurrent();
             $table->dateTime('updated_at')->useCurrent();
         });

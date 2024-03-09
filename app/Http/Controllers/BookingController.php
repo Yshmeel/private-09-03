@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\BookingResource;
+use App\Http\Resources\PassengerResource;
 use App\Models\Booking;
 use App\Models\Flight;
 use App\Models\Passenger;
@@ -11,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use function Symfony\Component\String\b;
 
 /**
  * TODO-list:
@@ -129,10 +131,10 @@ class BookingController extends Controller
                 ];
             }
 
-            if($passenger->place_to != null) {
+            if($passenger->place_back != null) {
                 $occupiedTo[] = [
                     'passenger_id' => $passenger->id,
-                    'place' => $passenger->place_to
+                    'place' => $passenger->place_back
                 ];
             }
         }
@@ -140,9 +142,83 @@ class BookingController extends Controller
         return response()->json([
             'data' => [
                 'occupied_from' => $occupiedFrom,
-                'occupied_to' => $occupiedTo,
+                'occupied_back' => $occupiedTo,
             ]
         ], 200);
+    }
+
+    /**
+     * Method for selecting seats in booking
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function selectSeat(Request $request, string $code) {
+        $request->validate([
+            'passenger' => 'required|integer',
+            'seat' => 'required|string|min:2|max:3',
+            'type' => 'required|string|in:from,back'
+        ]);
+
+        $passenger = $request->input('passenger');
+        $seat = $request->input('seat');
+        $type = $request->input('type');
+
+        $booking = Booking::query()->where('code', $code)->firstOrFail();
+
+        // NOTE: get other bookings within this flight to not allow to occupy other's seats
+        $otherBookings = Booking::query()
+            ->select(['id'])
+            ->where(
+                $type == 'from' ? 'flight_from' : 'flight_back',
+                $type == 'from' ? $booking->flight_from : $booking->flight_back,
+            )
+            ->get(['id'])
+            ->map(function($v) { return $v->id; });
+
+        // NOTE: ternary operator decides field to be used in where closure
+        $passengerWithSamePlace = Passenger::query()
+            ->whereIn('booking_id', $otherBookings)
+            ->where($type == 'from' ? 'place_from' : 'place_back', $seat)
+            ->whereNot('id', $passenger)
+            ->first();
+
+        if($passengerWithSamePlace != null) {
+            return response()->json([
+                'error' => [
+                    'code' => 422,
+                    'message' => 'Seat is occupied'
+                ],
+            ], 422);
+        }
+
+        $passenger = Passenger::query()
+            ->where('booking_id', $booking->id)
+            ->where('id', $passenger)->first();
+
+        // NOTE: user cannot provide invalid passenger id
+        if($passenger == null) {
+            return response()->json([
+                'error' => [
+                    'code' => 403,
+                    'message' => 'Passenger does not apply to booking'
+                ],
+            ], 403);
+        }
+
+        switch($type) {
+            case 'from':
+                $passenger->place_from = $seat;
+                break;
+            case 'back':
+                $passenger->place_back = $seat;
+                break;
+        }
+
+        $passenger->save();
+
+        return response()->json([
+            'data' => new PassengerResource($passenger)
+        ]);
     }
 
     public function getUserBookings(Request $request) {

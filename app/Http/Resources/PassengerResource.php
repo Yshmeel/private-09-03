@@ -22,7 +22,7 @@ class PassengerResource extends JsonResource
             'birth_date' => $this->birth_date,
             'document_number' => $this->document_number,
             'place_from' => $this->place_from ?? null,
-            'place_to' => $this->place_to ?? null,
+            'place_back' => $this->place_back ?? null,
         ];
     }
 }
