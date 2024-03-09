@@ -67,7 +67,7 @@ class BookingController extends Controller
         $booking->flight_back = $flightBack->id;
         $booking->date_from = $flightFromObject->date;
         $booking->date_back = $flightBackObject->date;
-        $booking->code = Str::upper(Str::random(5));
+        $booking->code = Str::upper(Str::password(5, true, false, false));
 
         $booking->save();
 
