@@ -9,6 +9,8 @@ class Flight extends Model
 {
     use HasFactory;
 
+    public $_availablePlacesCount = -1;
+
     public $visible = [
         'id',
         'flight_code',
@@ -17,6 +19,7 @@ class Flight extends Model
         'time_from',
         'time_to',
         'cost',
+        'places_count',
         'created_at',
         'updated_at'
     ];
@@ -28,4 +31,23 @@ class Flight extends Model
     public function to() {
         return $this->belongsTo(Airport::class);
     }
+
+    /**
+     * Method counts available places count for flight
+     * @return int
+     */
+    public function availablePlacesCount() {
+        if($this->_availablePlacesCount !== null) {
+            return $this->_availablePlacesCount;
+        }
+
+        $bookings = Booking::query()
+            ->where('flight_from', $this->id)
+            ->orWhere('flight_to', $this->id)
+            ->get();
+
+        $count = $this->places_count - count($bookings);
+        $this->_availablePlacesCount = $count;
+    }
+
 }

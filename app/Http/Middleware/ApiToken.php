@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Validation\UnauthorizedException;
 use Symfony\Component\HttpFoundation\Response;
 
 class ApiToken
@@ -15,6 +17,14 @@ class ApiToken
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $token = $request->bearerToken();
+        $user = User::query()->where('api_token', $token)->first();
+
+        if($user == null) {
+            throw new UnauthorizedException();
+        }
+
+        auth()->setUser($user);
         return $next($request);
     }
 }

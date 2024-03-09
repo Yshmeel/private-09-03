@@ -18,10 +18,10 @@ return new class extends Migration
             $table->string('last_name', 255);
             $table->date('birth_date');
             $table->string('document_number', 10);
-            $table->string('place_from', 3);
-            $table->string('place_to', 3);
-            $table->dateTime('created_at');
-            $table->dateTime('updated_at');
+            $table->string('place_from', 3)->nullable();
+            $table->string('place_to', 3)->nullable();
+            $table->dateTime('created_at')->useCurrent();
+            $table->dateTime('updated_at')->useCurrent();
         });
     }
 

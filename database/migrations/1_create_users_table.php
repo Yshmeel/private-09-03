@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('password', 255);
             $table->string('document_number', 255);
             $table->string('api_token', 255);
-            $table->dateTime('created_at');
-            $table->dateTime('updated_at');
+            $table->dateTime('created_at')->useCurrent();
+            $table->dateTime('updated_at')->useCurrent();
         });
     }
 

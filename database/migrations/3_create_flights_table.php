@@ -19,8 +19,9 @@ return new class extends Migration
             $table->time('time_from');
             $table->time('time_to');
             $table->integer('cost');
-            $table->dateTime('created_at');
-            $table->dateTime('updated_at');
+            $table->integer('places_count')->default(10);
+            $table->dateTime('created_at')->useCurrent();
+            $table->dateTime('updated_at')->useCurrent();
         });
     }
 

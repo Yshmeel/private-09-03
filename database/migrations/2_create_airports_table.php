@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('city', 255);
             $table->string('name', 255);
             $table->string('iata', 255);
-            $table->dateTime('created_at');
-            $table->dateTime('updated_at');
+            $table->dateTime('created_at')->useCurrent();
+            $table->dateTime('updated_at')->useCurrent();
         });
     }
 

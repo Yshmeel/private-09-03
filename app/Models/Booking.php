@@ -27,4 +27,8 @@ class Booking extends Model
     public function flightTo() {
         return $this->belongsTo(Flight::class, 'flight_to');
     }
+
+    public function passengers() {
+        return $this->hasMany(Passenger::class);
+    }
 }

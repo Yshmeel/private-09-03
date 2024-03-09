@@ -18,8 +18,8 @@ return new class extends Migration
             $table->date('date_from');
             $table->date('date_to');
             $table->string('code', 5);
-            $table->dateTime('created_at');
-            $table->dateTime('updated_at');
+            $table->dateTime('created_at')->useCurrent();
+            $table->dateTime('updated_at')->useCurrent();
         });
     }
 
