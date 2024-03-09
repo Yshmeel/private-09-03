@@ -28,6 +28,6 @@ Route::get('/api/booking/{code}/seat', [\App\Http\Controllers\BookingController:
 Route::patch('/api/booking/{code}/seat', [\App\Http\Controllers\BookingController::class, 'selectSeat']);
 
 Route::middleware('auth.api')->group(function() {
-    Route::get('/user/booking', [\App\Http\Controllers\BookingController::class, 'getOccupiedSeats']);
+    Route::get('/user/booking', [\App\Http\Controllers\BookingController::class, 'getUserBookings']);
     Route::get('/user', [\App\Http\Controllers\UserController::class, 'current']);
 });

@@ -78,20 +78,27 @@ class FlightsController extends Controller
         $flightsBack = [];
 
         foreach($flights as $flight) {
-            // NOTE: all bookings were made to satisfy places count. Do not show in result list
-            if($flight->availablePlacesCount($date1) < $passengers ||
-                $flight->availablePlacesCount($date2) < $passengers) {
+            if($flight->availablePlacesCount($date1) < $passengers ) {
                 continue;
             }
 
             // NOTE: is flight in loop is TO destination
-            if($flight->from->iata == $from && $flight->to->iata == $to) {
+            if(
+                ($flight->from->iata == $from && $flight->to->iata == $to) &&
+                // NOTE: all bookings were made to satisfy places count, if so - not show in result list
+                $flight->availablePlacesCount($date1) > $passengers
+            ) {
                 $flight->date = $date1;
                 $flightsTo[] = $flight;
             }
 
-            // NOTE: is  flight in loop is FROM destination
-            if($date2 != null && $flight->from->iata == $to && $flight->to->iata == $from) {
+            // NOTE: is flight in loop is FROM destination
+            if(
+                $date2 != null &&
+                ($flight->from->iata == $to && $flight->to->iata == $from) &&
+                // NOTE: all bookings were made to satisfy places count, if so - not show in result list
+                $flight->availablePlacesCount($date2) > $passengers
+            ) {
                 $flight->date = $date2;
                 $flightsBack[] = $flight;
             }

@@ -7,19 +7,10 @@ use App\Http\Resources\PassengerResource;
 use App\Models\Booking;
 use App\Models\Flight;
 use App\Models\Passenger;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use function Symfony\Component\String\b;
-
-/**
- * TODO-list:
- * 1) fix exception handler for validation (test errors bag) +
- * 2) test $request->json in booking
- * 3) add select seat method
- */
 
 class BookingController extends Controller
 {
@@ -165,6 +156,20 @@ class BookingController extends Controller
 
         $booking = Booking::query()->where('code', $code)->firstOrFail();
 
+        $passenger = Passenger::query()
+            ->where('booking_id', $booking->id)
+            ->where('id', $passenger)->first();
+
+        // NOTE: user cannot provide invalid passenger id
+        if($passenger == null) {
+            return response()->json([
+                'error' => [
+                    'code' => 403,
+                    'message' => 'Passenger does not apply to booking'
+                ],
+            ], 403);
+        }
+
         // NOTE: get other bookings within this flight to not allow to occupy other's seats
         $otherBookings = Booking::query()
             ->select(['id'])
@@ -191,20 +196,6 @@ class BookingController extends Controller
             ], 422);
         }
 
-        $passenger = Passenger::query()
-            ->where('booking_id', $booking->id)
-            ->where('id', $passenger)->first();
-
-        // NOTE: user cannot provide invalid passenger id
-        if($passenger == null) {
-            return response()->json([
-                'error' => [
-                    'code' => 403,
-                    'message' => 'Passenger does not apply to booking'
-                ],
-            ], 403);
-        }
-
         switch($type) {
             case 'from':
                 $passenger->place_from = $seat;
@@ -225,7 +216,7 @@ class BookingController extends Controller
         $user = auth()->user();
 
         $passengers = Passenger::query()
-            ->with(['booking'])
+            ->with(['booking.flightFrom', 'booking.flightBack'])
             ->where('document_number', $user->document_number)
             ->get();
 
@@ -234,7 +225,7 @@ class BookingController extends Controller
 
         return response()->json([
             'data' => [
-                'items' => new BookingResource($passengers->map(function ($f) {
+                'items' => BookingResource::collection($passengers->map(function ($f) {
                     return $f->booking;
                 }))
             ]
